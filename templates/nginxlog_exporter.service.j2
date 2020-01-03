@@ -1,0 +1,20 @@
+[Unit]
+Description=Prometheus Nginxlog Exporter
+Documentation=https://github.com/martin-helmich/prometheus-nginxlog-exporter
+After=network.target
+
+[Service]
+Type=simple
+User={{ nginxlog_exporter_user }}
+Group={{ nginxlog_exporter_group }}
+
+ExecStart={{ deploy_helper.new_release_path }}/prometheus-nginxlog-exporter \
+    -config-file {{ deploy_helper.shared_path }}/config.yaml
+
+SyslogIdentifier=nginxlog_exporter
+Restart=always
+ProtectSystem=full
+CapabilityBoundingSet=
+
+[Install]
+WantedBy=multi-user.target

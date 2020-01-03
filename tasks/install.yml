@@ -1,0 +1,83 @@
+---
+
+- name: Create the nginxlog_exporter group
+  group:
+    name: "{{ nginxlog_exporter_group }}"
+    state: present
+    system: true
+
+- name: Create the nginxlog_exporter user
+  user:
+    name: "{{ nginxlog_exporter_user }}"
+    group: "{{ nginxlog_exporter_group }}"
+    shell: /usr/sbin/nologin
+    system: true
+    createhome: false
+    home: "{{ nginxlog_exporter_root_dir }}"
+
+- name: create nginxlog_exporter directories
+  file:
+    path: "{{ nginxlog_exporter_root_dir }}"
+    state: directory
+    owner: "{{ nginxlog_exporter_user }}"
+    group: "{{ nginxlog_exporter_group }}"
+    mode: 0750
+
+- name: check if installed
+  stat:
+    path: "{{ nginxlog_exporter_root_dir }}/releases/{{ nginxlog_exporter_version }}/prometheus-nginxlog-exporter"
+  register: nginxlog_exporter_bin
+
+- name: initialize the deploy root and gather facts
+  deploy_helper:
+    path: "{{ nginxlog_exporter_root_dir }}"
+    release: "{{ nginxlog_exporter_version }}"
+    shared_path: "{{ nginxlog_exporter_shared_dir }}"
+    state: present
+
+- name: create release directory
+  file:
+    dest: "{{ deploy_helper.new_release_path }}"
+    state: directory
+    owner: "{{ nginxlog_exporter_user }}"
+    group: "{{ nginxlog_exporter_group }}"
+    mode: 0750
+
+- name: download release
+  get_url:
+    url: "{{ nginxlog_exporter_download_url }}"
+    dest: "{{ deploy_helper.new_release_path }}/prometheus-nginxlog-exporter"
+    remote_src: true
+    owner: "{{ nginxlog_exporter_user }}"
+    group: "{{ nginxlog_exporter_group }}"
+    mode: 0755
+  register: _download_release
+  until: _download_release is succeeded
+  retries: 5
+  delay: 2
+  when: not nginxlog_exporter_bin.stat.exists or nginxlog_exporter_force_install|bool
+
+- name: create config
+  template:
+    src: config.yaml.j2
+    dest: "{{ deploy_helper.shared_path }}/config.yaml"
+    owner: "{{ nginxlog_exporter_user }}"
+    group: "{{ nginxlog_exporter_group }}"
+    mode: 0600
+  notify: restart nginxlog_exporter
+
+- name: create systemd service unit
+  template:
+    src: nginxlog_exporter.service.j2
+    dest: /etc/systemd/system/nginxlog_exporter.service
+    owner: root
+    group: root
+    mode: 0644
+  notify: restart nginxlog_exporter
+
+- name: finalize the deploy, removing the unfinished file and switching the symlink
+  deploy_helper:
+    path: "{{ nginxlog_exporter_root_dir }}"
+    release: "{{ deploy_helper.new_release }}"
+    state: finalize
+  notify: restart nginxlog_exporter

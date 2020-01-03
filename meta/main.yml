@@ -1,0 +1,25 @@
+---
+galaxy_info:
+  author: Maxim Baranov <maksim.baranov@gmail.com>
+  description: Prometheus Nginx access log Exporter https://github.com/martin-helmich/prometheus-nginxlog-exporter
+  license: MIT
+  min_ansible_version: 2.5
+  platforms:
+    - name: Ubuntu
+      versions:
+        - xenial
+    - name: Debian
+      versions:
+        - stretch
+    - name: EL
+      versions:
+        - 7
+  galaxy_tags:
+    - monitoring
+    - prometheus
+    - exporter
+    - nginx
+    - metrics
+    - system
+
+dependencies: []

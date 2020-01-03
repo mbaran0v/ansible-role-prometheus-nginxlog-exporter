@@ -1,0 +1,11 @@
+---
+
+- import_tasks: preflight.yml
+
+- import_tasks: install.yml
+
+- name: Ensure Nginxlog Exporter is enabled on boot
+  systemd:
+    daemon_reload: true
+    name: nginxlog_exporter
+    enabled: true

@@ -1,0 +1,7 @@
+---
+
+- name: Naive assertion for ansible_service_mgr (fail on unsupported init systems)
+  assert:
+    that:
+      - ansible_service_mgr == "systemd"
+    fail_msg: "this role work only with systemd distributives"

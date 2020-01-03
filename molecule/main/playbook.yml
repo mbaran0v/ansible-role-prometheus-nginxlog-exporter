@@ -1,0 +1,8 @@
+---
+
+- name: Converge
+  hosts: all
+  connection: local
+
+  roles:
+    - role: ansible-role-prometheus-nginxlog-exporter
