@@ -28,9 +28,23 @@ nginxlog_exporter_listen_port: 4040
 listen port
 
 ```yaml
-nginxlog_exporter_root_dir: /opt/redis_exporter
+nginxlog_exporter_root_dir: /opt/nginxlog_exporter
 ```
 directory for installation
+
+```yaml
+nginxlog_exporter_config_vars: |
+  listen:
+    port: {{ nginxlog_exporter_listen_port }}
+    addres: {{ nginxlog_exporter_listen_address }}
+  namespaces:
+    - name: nginx
+      format: "$remote_addr [$time_local] \"$request\" $status $body_bytes_sent $request_time $upstream_response_time"
+      source_files:
+        - "/var/log/nginx/exporter.log"
+      histogram_buckets: [.1, .3, .5, .7, 1, 3, 5, 7]
+```
+configuration file https://github.com/martin-helmich/prometheus-nginxlog-exporter#configuration-file
 
 Dependencies
 ------------
