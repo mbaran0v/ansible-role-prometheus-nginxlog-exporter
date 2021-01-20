@@ -20,8 +20,8 @@ driver:
 dependency:
   name: galaxy
 
-lint:
-  name: yamllint
+lint: |
+  yamllint .
 
 platforms:
   - name: centos7
