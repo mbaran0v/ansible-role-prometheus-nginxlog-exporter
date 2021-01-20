@@ -36,7 +36,7 @@ directory for installation
 nginxlog_exporter_config_vars: |
   listen:
     port: {{ nginxlog_exporter_listen_port }}
-    addres: {{ nginxlog_exporter_listen_address }}
+    address: {{ nginxlog_exporter_listen_address }}
   namespaces:
     - name: nginx
       format: "$remote_addr [$time_local] \"$request\" $status $body_bytes_sent $request_time $upstream_response_time"
