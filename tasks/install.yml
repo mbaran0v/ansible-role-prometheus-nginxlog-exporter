@@ -47,7 +47,6 @@
   get_url:
     url: "{{ nginxlog_exporter_download_url }}"
     dest: "{{ deploy_helper.new_release_path }}/prometheus-nginxlog-exporter"
-    remote_src: true
     owner: "{{ nginxlog_exporter_user }}"
     group: "{{ nginxlog_exporter_group }}"
     mode: 0755
