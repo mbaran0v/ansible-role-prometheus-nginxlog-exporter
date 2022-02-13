@@ -25,7 +25,7 @@
 
 - name: check if installed
   stat:
-    path: "{{ nginxlog_exporter_root_dir }}/releases/{{ nginxlog_exporter_version }}/prometheus-nginxlog-exporter"
+    path: "{{ nginxlog_exporter_root_dir }}/releases/{{ nginxlog_exporter_version }}/{{ nginxlog_exporter_extracted_file }}"
   register: nginxlog_exporter_bin
 
 - name: initialize the deploy root and gather facts
@@ -43,23 +43,40 @@
     group: "{{ nginxlog_exporter_group }}"
     mode: 0750
 
-- name: download release
-  get_url:
-    url: "{{ nginxlog_exporter_download_url }}"
-    dest: "{{ deploy_helper.new_release_path }}/prometheus-nginxlog-exporter"
-    remote_src: true
-    owner: "{{ nginxlog_exporter_user }}"
-    group: "{{ nginxlog_exporter_group }}"
-    mode: 0755
-  register: _download_release
-  until: _download_release is succeeded
-  retries: 5
-  delay: 2
+- block:
+
+    - name: create temporary deploy dir
+      file:
+        path: "{{ nginxlog_exporter_root_dir }}/tmp"
+        state: directory
+
+    - name: download release
+      get_url:
+        url: "{{ nginxlog_exporter_download_url }}"
+        dest: "{{ nginxlog_exporter_root_dir }}/tmp/{{ nginxlog_exporter_archive_name }}"
+        owner: "{{ nginxlog_exporter_user }}"
+        group: "{{ nginxlog_exporter_group }}"
+        mode: 0755
+      register: _download_release
+      until: _download_release is succeeded
+      retries: 5
+      delay: 2
+
+    - name: unpack archive
+      unarchive:
+        src: "{{ nginxlog_exporter_root_dir }}/tmp/{{ nginxlog_exporter_archive_name }}"
+        dest: "{{ deploy_helper.new_release_path }}"
+        remote_src: yes
+        creates: "{{ deploy_helper.new_release_path }}/{{ nginxlog_exporter_extracted_file }}"
+        owner: "{{ nginxlog_exporter_user }}"
+        group: "{{ nginxlog_exporter_group }}"
+        mode: 0755
+
   when: not nginxlog_exporter_bin.stat.exists or nginxlog_exporter_force_install|bool
 
 - name: create config
   template:
-    src: config.yaml.j2
+    src: "{{ nginxlog_exporter_config_template }}"
     dest: "{{ deploy_helper.shared_path }}/config.yaml"
     owner: "{{ nginxlog_exporter_user }}"
     group: "{{ nginxlog_exporter_group }}"
