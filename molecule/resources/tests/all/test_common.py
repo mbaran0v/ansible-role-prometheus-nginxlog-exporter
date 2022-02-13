@@ -1,7 +1,7 @@
 
 debian_os = ['debian', 'ubuntu']
 rhel_os = ['redhat', 'centos']
-version = '1.3.0'
+version = '1.9.2'
 root_dir = '/opt/nginxlog_exporter'
 config_file = root_dir + '/shared/config.yaml'
 service_name = 'nginxlog_exporter'
